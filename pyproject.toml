@@ -1,0 +1,52 @@
+[project]
+name = "hcr-c2-011"
+version = "0.1.0"
+description = "ClinicalGuidelinesQAAgent — AgentCore Template"
+requires-python = ">=3.11"
+# The framework (agenticstar-agentcore) is NOT a public-PyPI dependency; it is
+# installed separately (see the README prerequisites). Pinning it here would
+# make `pip install -e .` fail because it is not resolvable from the default
+# index.
+dependencies = [
+    "agenticstar-agentcore[marketplace,openai]==1.0.3",]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.3",
+    "pytest-cov==5.0.0",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.4.4",
+    "mypy==1.10.0",
+    "types-PyYAML==6.0.12.20260815",
+]
+
+[build-system]
+requires = ["setuptools==68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+exclude = ["src/examples/"]
+# Wheel-compatibility exception: the published agenticstar-agentcore wheel ships
+# no py.typed marker, so framework.* / shared.* imports resolve to Any — which
+# would make every required framework subclass an [import-untyped] error and a
+# "subclass of Any". Every other strict setting stays on.
+disallow_subclassing_any = false
+
+[[tool.mypy.overrides]]
+module = ["framework.*", "shared.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["src.schemas.state"]
+# Same root cause as above: with no py.typed marker, `AgentState` resolves to
+# Any, so mypy cannot see this class as the TypedDict it is at runtime — and
+# every correct NotRequired[] field then reads as "NotRequired outside a
+# TypedDict". The declarations are right; the checker cannot see the base.
+# Scoped to this one module so the rule stays live everywhere else.
+disable_error_code = ["valid-type"]

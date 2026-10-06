@@ -1,0 +1,24 @@
+# Runtime parameters — loaded by AgentRegistry, passed as Graph(config=...).
+# Separate from config/agent.yaml (the static manifest).
+
+max_retry: 3
+timeout_s: 30
+
+# LLM — HCR life-safety: deterministic output for clinical advisory answers.
+llm:
+  system_prompt_template: "prompts/hcr_qa.j2"
+  temperature: 0.0
+  max_tokens: 4000
+
+# RAG retrieval over the (synthetic) clinical guidelines KB.
+# score_threshold is high (>= 0.75) so low-confidence evidence is dropped
+# rather than grounding an advisory clinical answer on weak retrieval.
+retrieval:
+  collection: "hcr_clinical_guidelines__kb"
+  top_k: 5
+  score_threshold: 0.75
+  hybrid_search: false
+
+# Security
+security:
+  s3_gate_enabled: true
